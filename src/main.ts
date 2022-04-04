@@ -2,6 +2,11 @@ import * as THREE from 'three'
 
 import firstPersonControls from './firstPersonControls'
 
+import {
+    Grass,
+    Dirt,
+    Stone,
+} from './blocks'
 
 const loader = new THREE.TextureLoader()
 
@@ -9,6 +14,90 @@ let camera: THREE.PerspectiveCamera,
     world: THREE.Group, scene: THREE.Scene,
     renderer: THREE.WebGLRenderer,
     controls: typeof firstPersonControls
+
+
+function constructRows(x: number, z: number, width: number, deep: number) {
+    const group = new THREE.Group()
+
+    for (let i = z; i<z+deep; i++) {
+        for (let j = x-1; j<x+width+1; j++) {
+            const g = Grass(j, 0, -i)
+            group.add(g)
+        }
+
+        // 
+        // On gère la droite
+        // 
+        let XWall = x+width
+        let hasFirstOnRight = false
+        if (Math.random() > 0.4) {
+            hasFirstOnRight = true
+            group.add(Stone(XWall, 1, -i))
+        } else {
+            group.add(Stone(XWall+1, 1, -i))
+            if (Math.random() > 0.8) {
+                group.add(Dirt(XWall, 1, -i))
+            }
+        }
+
+        let hasSecondOnFirstOnRight = false
+        if (hasFirstOnRight) {
+            if (Math.random() > 0.6) {
+                group.add(Stone(XWall, 2, -i))
+                hasSecondOnFirstOnRight = true
+            } else {
+                group.add(Stone(XWall+1, 2, -i))
+            }
+        } else {
+            group.add(Stone(XWall+1, 2, -i))
+        }
+
+        if (hasSecondOnFirstOnRight) {
+            group.add(Grass(XWall+1, 3, -i))
+        } else if (Math.random() > 0.8) {
+            group.add(Grass(XWall+1, 3, -i))
+        } else {
+            group.add(Grass(XWall+2, 3, -i))
+        }
+
+        // 
+        // On gère la gauche
+        // 
+        XWall = x-1
+        let hasFirstOnLeft = false
+        if (Math.random() > 0.4) {
+            hasFirstOnLeft = true
+            group.add(Stone(XWall, 1, -i))
+        } else {
+            group.add(Stone(XWall-1, 1, -i))
+            if (Math.random() > 0.8) {
+                group.add(Dirt(XWall, 1, -i))
+            }
+        }
+
+        let hasSecondOnFirstOnLeft = false
+        if (hasFirstOnLeft) {
+            if (Math.random() > 0.6) {
+                group.add(Stone(XWall, 2, -i))
+                hasSecondOnFirstOnLeft = true
+            } else {
+                group.add(Stone(XWall-1, 2, -i))
+            }
+        } else {
+            group.add(Stone(XWall-1, 2, -i))
+        }
+
+        if (hasSecondOnFirstOnLeft) {
+            group.add(Grass(XWall-1, 3, -i))
+        } else if (Math.random() > 0.8) {
+            group.add(Grass(XWall-1, 3, -i))
+        } else {
+            group.add(Grass(XWall-2, 3, -i))
+        }
+    }
+
+    return group
+}
 
 
 function init() {
@@ -21,6 +110,10 @@ function init() {
     world = new THREE.Group()
 
     scene = new THREE.Scene()
+    
+    const axesHelper = new THREE.AxesHelper(10)
+    scene.add( axesHelper )
+
     scene.background = new THREE.Color(0xffffff)
     // scene.fog = new THREE.Fog(0xffffff, 0, 2000)
 
@@ -38,44 +131,31 @@ function init() {
     controls = new firstPersonControls(camera)
     // @ts-ignore
     scene.add(controls.getObject())
-
-
-    const floorGeometry = new THREE.PlaneBufferGeometry(4, 4, 4, 4)
-
-    const texture = loader.load(require(`./assets/blocks/grass.jpg`).default)
-    texture.magFilter = THREE.NearestFilter
-    texture.minFilter = THREE.LinearMipMapLinearFilter
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.RepeatWrapping
-    texture.repeat.set(4, 4)
-    const floorMaterial = new THREE.MeshBasicMaterial({
-        map: texture,
-    })
-
-    var floor = new THREE.Mesh(floorGeometry, floorMaterial)
-    floor.rotation.x = - Math.PI / 2
-    floor.receiveShadow = true
-    world.add(floor)
-
-
-
-    const dirt = loader.load(require('./assets/blocks/dirt.jpg').default)
-
-    const geometry = new THREE.BoxGeometry(1, 1, 1)
-    const material = new THREE.MeshBasicMaterial({
-        map: dirt,
-    })
-    const cube = new THREE.Mesh(geometry, material)
-    cube.position.z = -1
-    cube.position.y = 1
-    scene.add(cube)
+    
+    let rowZ = 0
+    const deep = 20
+    const row = constructRows(-2, rowZ, 5, deep)
+    world.add(row)
 
 
     scene.add(world)
 
 }
 
+const GENERATION_DEEP = 20
+const GENERATION_THRESHOLD = GENERATION_DEEP * 10
+let lastGenerated = 0
+
 function animate() {
+    
+    
+    console.log(lastGenerated)
+    // @ts-ignore
+    if (-controls.getObject().position.z > lastGenerated - GENERATION_THRESHOLD) {
+        const row = constructRows(-2, lastGenerated, 5, GENERATION_DEEP)
+        lastGenerated += GENERATION_DEEP
+        world.add(row)
+    }
 
     requestAnimationFrame(animate)
 
@@ -83,6 +163,13 @@ function animate() {
     if (controls.enabled === true) {
         // @ts-ignore
         controls.update()
+
+
+        // 
+        // Génération du monde
+        // 
+
+
     }
 
     renderer.render(scene, camera)

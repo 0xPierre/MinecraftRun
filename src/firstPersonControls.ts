@@ -29,7 +29,7 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, spe
     pitchObject.add(camera)
 
     let yawObject = new THREE.Object3D()
-    yawObject.position.y = 10
+    // yawObject.position.y = 10
     yawObject.add(pitchObject)
 
     let PI_2 = Math.PI / 2
