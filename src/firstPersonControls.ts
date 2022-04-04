@@ -2,15 +2,15 @@
 import * as THREE from 'three'
 
 
-export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, speed = 800.0, jumpHeight = 350.0, height = 30.0) {
+export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, speed = 10.0, jumpHeight = 12.0, height = 2.0) {
     let scope = this
 
     scope.MouseMoveSensitivity = MouseMoveSensitivity
     scope.speed = speed
     scope.height = height
-    scope.jumpHeight = scope.height + jumpHeight
+    scope.jumpHeight = jumpHeight
     scope.click = false
-    
+
     let moveForward = false
     let moveBackward = false
     let moveLeft = false
@@ -157,22 +157,35 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, spe
         let time = performance.now()
         let delta = (time - prevTime) / 1000
 
-        velocity.y -= 9.8 * 100.0 * delta
+        velocity.y -= 9.8 * 4 * delta
         velocity.x -= velocity.x * 10.0 * delta
         velocity.z -= velocity.z * 10.0 * delta
-
         direction.z = Number(moveForward) - Number(moveBackward)
         direction.x = Number(moveRight) - Number(moveLeft)
         direction.normalize()
 
+
         let currentSpeed = scope.speed
         if (run && (moveForward || moveBackward || moveLeft || moveRight)) currentSpeed = currentSpeed + (currentSpeed * 1.1)
 
-        if (moveForward || moveBackward) velocity.z -= direction.z * currentSpeed * delta
-        if (moveLeft || moveRight) velocity.x -= direction.x * currentSpeed * delta
+        if (moveLeft) {
+            yawObject.translateX(-currentSpeed * delta)
+        }
+        if (moveRight) {
+            yawObject.translateX(currentSpeed * delta)
+        }
+        if (moveForward) {
+            yawObject.translateZ(-currentSpeed * delta)
+        }
+        if (moveBackward) {
+            yawObject.translateZ(currentSpeed * delta)
+        }
 
-        scope.getObject().translateX(-velocity.x * delta)
-        scope.getObject().translateZ(velocity.z * delta)
+        // if (moveForward || moveBackward) velocity.z -= direction.z * currentSpeed * delta
+        // if (moveLeft || moveRight) velocity.x -= direction.x * currentSpeed * delta
+
+        // scope.getObject().translateX(-velocity.x * delta)
+        // scope.getObject().translateZ(velocity.z * delta)
 
         scope.getObject().position.y += (velocity.y * delta)
 

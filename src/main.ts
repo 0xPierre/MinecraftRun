@@ -6,9 +6,9 @@ import firstPersonControls from './firstPersonControls'
 const loader = new THREE.TextureLoader()
 
 let camera: THREE.PerspectiveCamera,
-world: THREE.Group, scene: THREE.Scene,
-renderer: THREE.WebGLRenderer,
-controls: typeof firstPersonControls
+    world: THREE.Group, scene: THREE.Scene,
+    renderer: THREE.WebGLRenderer,
+    controls: typeof firstPersonControls
 
 
 function init() {
@@ -22,7 +22,7 @@ function init() {
 
     scene = new THREE.Scene()
     scene.background = new THREE.Color(0xffffff)
-    scene.fog = new THREE.Fog(0xffffff, 0, 2000)
+    // scene.fog = new THREE.Fog(0xffffff, 0, 2000)
 
     renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setPixelRatio(window.devicePixelRatio)
@@ -33,21 +33,21 @@ function init() {
     renderer.outputEncoding = THREE.sRGBEncoding
 
     window.addEventListener('resize', onWindowResize, false)
-    
+
     // @ts-ignore
     controls = new firstPersonControls(camera)
     // @ts-ignore
     scene.add(controls.getObject())
 
 
-    const floorGeometry = new THREE.PlaneBufferGeometry(2000, 2000, 100, 100);
+    const floorGeometry = new THREE.PlaneBufferGeometry(4, 4, 4, 4)
 
     const texture = loader.load(require(`./assets/blocks/grass.jpg`).default)
-    texture.magFilter = THREE.NearestFilter;
+    texture.magFilter = THREE.NearestFilter
     texture.minFilter = THREE.LinearMipMapLinearFilter
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(100, 100)
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set(4, 4)
     const floorMaterial = new THREE.MeshBasicMaterial({
         map: texture,
     })
@@ -57,23 +57,35 @@ function init() {
     floor.receiveShadow = true
     world.add(floor)
 
+
+
+    const dirt = loader.load(require('./assets/blocks/dirt.jpg').default)
+
+    const geometry = new THREE.BoxGeometry(1, 1, 1)
+    const material = new THREE.MeshBasicMaterial({
+        map: dirt,
+    })
+    const cube = new THREE.Mesh(geometry, material)
+    cube.position.z = -1
+    cube.position.y = 1
+    scene.add(cube)
+
+
     scene.add(world)
 
-    // https://github.com/mrdoob/three.js/blob/master/examples/misc_controls_pointerlock.html
-    // https://threejs.org/examples/#misc_controls_pointerlock
 }
 
 function animate() {
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(animate)
 
     // @ts-ignore
     if (controls.enabled === true) {
         // @ts-ignore
-        controls.update();
+        controls.update()
     }
 
-    renderer.render(scene, camera);
+    renderer.render(scene, camera)
 
 }
 
@@ -88,5 +100,34 @@ function onWindowResize() {
 
 init()
 // @ts-ignore
-controls.enabled = true
+// controls.enabled = true
 animate()
+
+
+const instructions = document.querySelector('#instructions')
+const havePointerLock = 'pointerLockElement' in document
+
+if (instructions && havePointerLock) {
+    const element = document.body
+
+    const onPointerLockChange = (event: Event) => {
+        if (document.pointerLockElement === element) {
+            // @ts-ignore
+            controls.enabled = true
+            // @ts-ignore
+            instructions.style.display = 'none'
+        } else {
+            // @ts-ignore
+            controls.enabled = false
+            // @ts-ignore
+            instructions.style.display = ''
+        }
+    }
+
+    document.addEventListener('pointerlockchange', onPointerLockChange, false)
+
+    instructions.addEventListener('click', (event: Event) => {
+        // @ts-ignore
+        element.requestPointerLock()
+    })
+}
