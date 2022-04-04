@@ -19,8 +19,8 @@ let camera: THREE.PerspectiveCamera,
 function constructRows(x: number, z: number, width: number, deep: number) {
     const group = new THREE.Group()
 
-    for (let i = z; i<z+deep; i++) {
-        for (let j = x-1; j<x+width+1; j++) {
+    for (let i = z; i < z + deep; i++) {
+        for (let j = x - 1; j < x + width + 1; j++) {
             const g = Grass(j, 0, -i)
             group.add(g)
         }
@@ -28,13 +28,13 @@ function constructRows(x: number, z: number, width: number, deep: number) {
         // 
         // On gère la droite
         // 
-        let XWall = x+width
+        let XWall = x + width
         let hasFirstOnRight = false
         if (Math.random() > 0.4) {
             hasFirstOnRight = true
             group.add(Stone(XWall, 1, -i))
         } else {
-            group.add(Stone(XWall+1, 1, -i))
+            group.add(Stone(XWall + 1, 1, -i))
             if (Math.random() > 0.8) {
                 group.add(Dirt(XWall, 1, -i))
             }
@@ -46,30 +46,30 @@ function constructRows(x: number, z: number, width: number, deep: number) {
                 group.add(Stone(XWall, 2, -i))
                 hasSecondOnFirstOnRight = true
             } else {
-                group.add(Stone(XWall+1, 2, -i))
+                group.add(Stone(XWall + 1, 2, -i))
             }
         } else {
-            group.add(Stone(XWall+1, 2, -i))
+            group.add(Stone(XWall + 1, 2, -i))
         }
 
         if (hasSecondOnFirstOnRight) {
-            group.add(Grass(XWall+1, 3, -i))
+            group.add(Grass(XWall + 1, 3, -i))
         } else if (Math.random() > 0.8) {
-            group.add(Grass(XWall+1, 3, -i))
+            group.add(Grass(XWall + 1, 3, -i))
         } else {
-            group.add(Grass(XWall+2, 3, -i))
+            group.add(Grass(XWall + 2, 3, -i))
         }
 
         // 
         // On gère la gauche
         // 
-        XWall = x-1
+        XWall = x - 1
         let hasFirstOnLeft = false
         if (Math.random() > 0.4) {
             hasFirstOnLeft = true
             group.add(Stone(XWall, 1, -i))
         } else {
-            group.add(Stone(XWall-1, 1, -i))
+            group.add(Stone(XWall - 1, 1, -i))
             if (Math.random() > 0.8) {
                 group.add(Dirt(XWall, 1, -i))
             }
@@ -81,18 +81,18 @@ function constructRows(x: number, z: number, width: number, deep: number) {
                 group.add(Stone(XWall, 2, -i))
                 hasSecondOnFirstOnLeft = true
             } else {
-                group.add(Stone(XWall-1, 2, -i))
+                group.add(Stone(XWall - 1, 2, -i))
             }
         } else {
-            group.add(Stone(XWall-1, 2, -i))
+            group.add(Stone(XWall - 1, 2, -i))
         }
 
         if (hasSecondOnFirstOnLeft) {
-            group.add(Grass(XWall-1, 3, -i))
+            group.add(Grass(XWall - 1, 3, -i))
         } else if (Math.random() > 0.8) {
-            group.add(Grass(XWall-1, 3, -i))
+            group.add(Grass(XWall - 1, 3, -i))
         } else {
-            group.add(Grass(XWall-2, 3, -i))
+            group.add(Grass(XWall - 2, 3, -i))
         }
     }
 
@@ -110,9 +110,9 @@ function init() {
     world = new THREE.Group()
 
     scene = new THREE.Scene()
-    
+
     const axesHelper = new THREE.AxesHelper(10)
-    scene.add( axesHelper )
+    scene.add(axesHelper)
 
     scene.background = new THREE.Color(0xffffff)
     // scene.fog = new THREE.Fog(0xffffff, 0, 2000)
@@ -131,7 +131,7 @@ function init() {
     controls = new firstPersonControls(camera)
     // @ts-ignore
     scene.add(controls.getObject())
-    
+
     let rowZ = 0
     const deep = 20
     const row = constructRows(-2, rowZ, 5, deep)
@@ -143,13 +143,12 @@ function init() {
 }
 
 const GENERATION_DEEP = 20
-const GENERATION_THRESHOLD = GENERATION_DEEP * 10
+const GENERATION_THRESHOLD = GENERATION_DEEP * 2
 let lastGenerated = 0
 
 function animate() {
-    
-    
-    console.log(lastGenerated)
+
+
     // @ts-ignore
     if (-controls.getObject().position.z > lastGenerated - GENERATION_THRESHOLD) {
         const row = constructRows(-2, lastGenerated, 5, GENERATION_DEEP)
@@ -217,4 +216,10 @@ if (instructions && havePointerLock) {
         // @ts-ignore
         element.requestPointerLock()
     })
+    // document.addEventListener('keyup', (event: KeyboardEvent) => {
+    //     console.log(event)
+    //     if (event.code === 'Space') {
+    //         element.requestPointerLock()
+    //     }
+    // })
 }

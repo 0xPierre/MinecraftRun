@@ -2,11 +2,11 @@
 import * as THREE from 'three'
 
 
-export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, speed = 10.0, jumpHeight = 12.0, height = 2.0) {
+export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSpeed = 7.0, zSpeed = 6, jumpHeight = 12.0, height = 2.0) {
     let scope = this
 
     scope.MouseMoveSensitivity = MouseMoveSensitivity
-    scope.speed = speed
+    scope.speed = xSpeed
     scope.height = height
     scope.jumpHeight = jumpHeight
     scope.click = false
@@ -159,19 +159,20 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, spe
 
         velocity.y -= 9.8 * 4 * delta
         velocity.x -= velocity.x * 10.0 * delta
+        direction.x = Number(moveRight) - Number(moveLeft)
+
         velocity.z -= velocity.z * 10.0 * delta
         direction.z = Number(moveForward) - Number(moveBackward)
-        direction.x = Number(moveRight) - Number(moveLeft)
         direction.normalize()
 
 
         let currentSpeed = scope.speed
         if (run && (moveForward || moveBackward || moveLeft || moveRight)) currentSpeed = currentSpeed + (currentSpeed * 1.1)
 
-        if (moveLeft) {
+        if (moveLeft && yawObject.position.x > -2) {
             yawObject.translateX(-currentSpeed * delta)
         }
-        if (moveRight) {
+        if (moveRight && yawObject.position.x < 2) {
             yawObject.translateX(currentSpeed * delta)
         }
         if (moveForward) {
