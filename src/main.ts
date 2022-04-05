@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import * as CANNON from 'cannon-es'
 
 import firstPersonControls from './firstPersonControls'
 
@@ -106,7 +107,8 @@ function init() {
         0.1,
         1000
     )
-
+    // https://github.com/pmndrs/cannon-es
+    // https://pmndrs.github.io/cannon-es/docs/
     world = new THREE.Group()
 
     scene = new THREE.Scene()
@@ -136,6 +138,20 @@ function init() {
     const deep = 20
     const row = constructRows(-2, rowZ, 5, deep)
     world.add(row)
+
+    let color = 0xFFFFFF;
+    let intensity = 1;
+    const light2 = new THREE.AmbientLight(color, intensity);
+    scene.add(light2);
+    
+    color = 0xFFFFFF;
+    intensity = .5;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(0, 2, 5);
+    light.target.position.set(0, 2, -5);
+    scene.add(light);
+    scene.add(light.target)
+
 
 
     scene.add(world)

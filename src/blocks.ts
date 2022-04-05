@@ -7,7 +7,7 @@ const stoneTexture = loader.load(require('./assets/blocks/stone.jpg').default)
 
 const Grass = (x: number = 1, y: number = 1, z: number = 1) => {
     const geometry = new THREE.BoxGeometry(1, 1, 1)
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshPhongMaterial({
         map: grassTexture,
     })
     const cube = new THREE.Mesh(geometry, material)
@@ -21,7 +21,7 @@ const Grass = (x: number = 1, y: number = 1, z: number = 1) => {
 
 const Dirt = (x: number = 1, y: number = 1, z: number = 1) => {
     const geometry = new THREE.BoxGeometry(1, 1, 1)
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshPhongMaterial({
         map: dirtTexture,
     })
     const cube = new THREE.Mesh(geometry, material)
@@ -34,7 +34,7 @@ const Dirt = (x: number = 1, y: number = 1, z: number = 1) => {
 
 const Stone = (x: number = 1, y: number = 1, z: number = 1) => {
     const geometry = new THREE.BoxGeometry(1, 1, 1)
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshPhongMaterial({
         map: stoneTexture,
     })
     const cube = new THREE.Mesh(geometry, material)
