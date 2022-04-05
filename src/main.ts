@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import * as CANNON from 'cannon-es'
-
+// @ts-ignore
+import Stats from 'three/examples/jsm/libs/stats.module'
 import firstPersonControls from './firstPersonControls'
 
 import {
@@ -11,10 +12,14 @@ import {
 
 const loader = new THREE.TextureLoader()
 
+
+
 let camera: THREE.PerspectiveCamera,
     world: THREE.Group, scene: THREE.Scene,
     renderer: THREE.WebGLRenderer,
-    controls: typeof firstPersonControls
+    controls: typeof firstPersonControls,
+    cannonWorld: CANNON.World,
+    groundMesh: THREE.Mesh
 
 
 function constructRows(x: number, z: number, width: number, deep: number) {
@@ -100,7 +105,6 @@ function constructRows(x: number, z: number, width: number, deep: number) {
     return group
 }
 
-
 function init() {
     camera = new THREE.PerspectiveCamera(75,
         window.innerWidth / window.innerHeight,
@@ -112,7 +116,6 @@ function init() {
     world = new THREE.Group()
 
     scene = new THREE.Scene()
-
     const axesHelper = new THREE.AxesHelper(10)
     scene.add(axesHelper)
 
@@ -143,7 +146,7 @@ function init() {
     let intensity = 1;
     const light2 = new THREE.AmbientLight(color, intensity);
     scene.add(light2);
-    
+
     color = 0xFFFFFF;
     intensity = .5;
     const light = new THREE.DirectionalLight(color, intensity);
@@ -152,18 +155,63 @@ function init() {
     scene.add(light);
     scene.add(light.target)
 
-
-
+    const groundGeometry = new THREE.PlaneBufferGeometry(100, 100)
+    groundMesh = new THREE.Mesh(
+        groundGeometry,
+        new THREE.MeshPhongMaterial({ color: 'red', specular: 0x050505 })
+    )
+    world.add(groundMesh)
+    // https://www.youtube.com/watch?v=TPKWohwHrbo
     scene.add(world)
-
 }
+
+
+let sphereBody: CANNON.Body
+let sphereShape: CANNON.Shape
+let physicsMaterial: CANNON.Material
+let groundBody: CANNON.Body
+
+function initCannon() {
+    cannonWorld = new CANNON.World({
+        gravity: new CANNON.Vec3(0, -9.82, 0)
+    })
+
+    cannonWorld.broadphase.useBoundingBoxes = true
+
+    physicsMaterial = new CANNON.Material('physics')
+    const physics_physics = new CANNON.ContactMaterial(physicsMaterial, physicsMaterial, {
+        friction: 0.0,
+        restitution: 0.3,
+    })
+    cannonWorld.addContactMaterial(physics_physics)
+
+    const radius = 1.3
+    sphereShape = new CANNON.Sphere(radius)
+    sphereBody = new CANNON.Body({ mass: 5, material: physicsMaterial })
+    sphereBody.addShape(sphereShape)
+    sphereBody.position.set(0, 0, 0)
+    sphereBody.linearDamping = 0.9
+    cannonWorld.addBody(sphereBody)
+
+    groundBody = new CANNON.Body({
+        shape: new CANNON.Plane(),
+        mass: 10,
+    })
+    cannonWorld.addBody(groundBody)
+}
+
+
 
 const GENERATION_DEEP = 20
 const GENERATION_THRESHOLD = GENERATION_DEEP * 2
 let lastGenerated = 0
 
-function animate() {
+const stats = Stats()
+document.body.appendChild(stats.dom)
 
+const timeStep = 1 / 60
+function animate() {
+    stats.begin()
 
     // @ts-ignore
     if (-controls.getObject().position.z > lastGenerated - GENERATION_THRESHOLD) {
@@ -171,24 +219,26 @@ function animate() {
         lastGenerated += GENERATION_DEEP
         world.add(row)
     }
-
-    requestAnimationFrame(animate)
+    // @ts-ignore
+    groundMesh.position.copy(groundBody.position)
+    // @ts-ignore
+    groundMesh.quaternion.copy(groundBody.quaternion)
 
     // @ts-ignore
     if (controls.enabled === true) {
         // @ts-ignore
         controls.update()
-
-
-        // 
-        // Génération du monde
-        // 
-
-
     }
 
-    renderer.render(scene, camera)
+    cannonWorld.step(timeStep)
 
+    stats.end()
+
+    requestAnimationFrame(animate)
+
+
+    renderer.render(scene, camera)
+    stats.update()
 }
 
 
@@ -201,8 +251,7 @@ function onWindowResize() {
 
 
 init()
-// @ts-ignore
-// controls.enabled = true
+initCannon()
 animate()
 
 
