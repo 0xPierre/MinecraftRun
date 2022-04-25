@@ -10,6 +10,8 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
     scope.height = height
     scope.jumpHeight = jumpHeight
     scope.click = false
+    scope.autoForward = true
+    scope.mouseDirection = false
 
     let moveForward = false
     let moveBackward = false
@@ -35,8 +37,8 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
     let PI_2 = Math.PI / 2
 
     let onMouseMove = function (event: MouseEvent) {
-
         if (scope.enabled === false) return
+        if (!scope.mouseDirection) return
 
         let movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0
         let movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0
@@ -167,7 +169,7 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
 
 
         let currentSpeed = scope.speed
-        if (run && (moveForward || moveBackward || moveLeft || moveRight)) currentSpeed = currentSpeed + (currentSpeed * 1.1)
+        if (run && (moveForward || scope.autoForward || moveBackward || moveLeft || moveRight)) currentSpeed = currentSpeed + (currentSpeed * 1.1)
 
         if (moveLeft && yawObject.position.x > -2) {
             yawObject.translateX(-currentSpeed * delta)
@@ -175,10 +177,10 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
         if (moveRight && yawObject.position.x < 2) {
             yawObject.translateX(currentSpeed * delta)
         }
-        if (moveForward) {
+        if (moveForward || scope.autoForward) {
             yawObject.translateZ(-currentSpeed * delta)
         }
-        if (moveBackward) {
+        if (moveBackward && !scope.autoForward) {
             yawObject.translateZ(currentSpeed * delta)
         }
 
