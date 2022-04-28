@@ -6,10 +6,15 @@ import firstPersonControls from './firstPersonControls'
 
 import {
     Grass,
+    grassTexture,
     Dirt,
+    dirtTexture,
     Stone,
+    stoneTexture,
     Wood,
-} from './blocks'
+    woodTexture,
+    woodLine,
+} from './structures'
 
 const loader = new THREE.TextureLoader()
 
@@ -20,17 +25,39 @@ let camera: THREE.PerspectiveCamera,
     rows: THREE.Group[] = [],
     obstacles: THREE.Mesh[] = []
 
-// const constructObstacle = (x: number) => {
-//     const random = Math.random()
+const constructObstacle = (z: number) => {
+    const random = Math.random()
 
-//     const group = new THREE.Group()
+    const group = new THREE.Group()
 
-//     if (random > 0.8) {
-//         const wood = Wood(x, 1, -1)
-//         obstacles.push(wood)
-//         group.add(wood)
-//     }
-// }
+    // const wallGeometry = new THREE.BoxGeometry(
+    //     2,
+    //     1,
+    //     1
+    // )
+    // woodTexture.wrapS = THREE.RepeatWrapping;
+    // woodTexture.wrapT = THREE.RepeatWrapping;
+    // woodTexture.repeat.set( 2, 1 )
+    // const wallMaterial = new THREE.MeshPhongMaterial({
+    //     map: woodTexture,
+    // })
+
+    // const wall = new THREE.Mesh(wallGeometry, wallMaterial)
+    // wall.position.x = 0
+    // wall.position.y = 1
+    // wall.position.z = z
+    const woodline = woodLine(0, 1, z, 4, 1, 1)
+    group.add(woodline)
+    
+
+    // if (random > 0.8) {
+        // const wood = Wood(-2, 1, z)
+        // obstacles.push(wood)
+        // group.add(wood)
+    // }
+
+    return group
+}
 
 function constructRows(x: number, z: number, width: number, deep: number) {
     const group = new THREE.Group()
@@ -121,9 +148,12 @@ function constructRows(x: number, z: number, width: number, deep: number) {
 
         if (obstaclesLastPosition >= obstaclesThreshold) {
             obstaclesLastPosition = 0
-            const wood = Wood(XWall+1, 1, -i)
-            obstacles.push(wood)
-            group.add(wood)
+            // const wood = Wood(XWall+2, 1, -i)
+            // obstacles.push(wood)
+            // group.add(wood)
+            // console.log(XWall, -i)
+            const obstacle = constructObstacle(-i)
+            group.add(obstacle)
         }
     }
 

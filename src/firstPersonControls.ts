@@ -10,8 +10,8 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
     scope.height = height
     scope.jumpHeight = jumpHeight
     scope.click = false
-    scope.autoForward = true
-    scope.mouseDirection = false
+    scope.autoForward = false
+    scope.mouseDirection = true
 
     let moveForward = false
     let moveBackward = false
