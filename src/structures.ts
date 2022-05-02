@@ -62,15 +62,17 @@ const Wood = (x: number = 1, y: number = 1, z: number = 1) => {
 }
 
 
-const woodLine = (x: number, y: number, z:number, width: number, depth: number, height: number) => {
-    const geometry = new THREE.BoxGeometry(width, height, depth)
+const woodLine = (x: number, y: number, z:number, width: number, height: number) => {
+    const geometry = new THREE.BoxGeometry(width, height, 1)
 
-    woodTexture.wrapS = THREE.RepeatWrapping;
-    woodTexture.wrapT = THREE.RepeatWrapping;
-    woodTexture.repeat.set( width, 1 )
+    const texture = loader.load(require('./assets/blocks/wood.png').default)
+
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set( width, height )
 
     const material = new THREE.MeshPhongMaterial({
-        map: woodTexture
+        map: texture
     })
     const line = new THREE.Mesh(geometry, material)
     line.position.x = x

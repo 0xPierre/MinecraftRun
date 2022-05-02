@@ -23,7 +23,8 @@ let camera: THREE.PerspectiveCamera,
     renderer: THREE.WebGLRenderer,
     controls: typeof firstPersonControls,
     rows: THREE.Group[] = [],
-    obstacles: THREE.Mesh[] = []
+    obstacles: THREE.Mesh[] = [],
+    raycaster: THREE.Raycaster
 
 const constructObstacle = (z: number) => {
     const random = Math.random()
@@ -46,9 +47,11 @@ const constructObstacle = (z: number) => {
     // wall.position.x = 0
     // wall.position.y = 1
     // wall.position.z = z
-    const woodline = woodLine(0, 1, z, 4, 1, 1)
+    const woodline = woodLine(0, 1, z, 5, 1)
     group.add(woodline)
+
     
+    obstacles.push(woodline)
 
     // if (random > 0.8) {
         // const wood = Wood(-2, 1, z)
@@ -151,7 +154,6 @@ function constructRows(x: number, z: number, width: number, deep: number) {
             // const wood = Wood(XWall+2, 1, -i)
             // obstacles.push(wood)
             // group.add(wood)
-            // console.log(XWall, -i)
             const obstacle = constructObstacle(-i)
             group.add(obstacle)
         }
@@ -168,6 +170,7 @@ function init() {
         0.1,
         1000
     )
+
     world = new THREE.Group()
 
     scene = new THREE.Scene()
@@ -191,6 +194,8 @@ function init() {
     controls = new firstPersonControls(camera)
     // @ts-ignore
     scene.add(controls.getObject())
+
+    raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 )
 
     let rowZ = 0
     const deep = 20
@@ -217,9 +222,9 @@ function init() {
 
 
 const GENERATION_DEEP = 20
-const GENERATION_THRESHOLD = GENERATION_DEEP * 2
-let lastGenerated = 0
-let lastDestroyed = 0
+const GENERATION_THRESHOLD = GENERATION_DEEP * 3
+let lastGenerated = 20
+let lastDestroyed = 20
 
 const stats = Stats()
 document.body.appendChild(stats.dom)
@@ -249,6 +254,14 @@ function animate() {
 
     // @ts-ignore
     if (controls.enabled === true) {
+        // @ts-ignore
+        raycaster.ray.origin.copy( controls.getObject().position );
+        // raycaster.ray.origin.y = 0
+
+        const intersections = raycaster.intersectObjects(obstacles, true)
+        // @ts-ignore
+        console.log(intersections, obstacles[0].position, raycaster.ray.origin)
+
         // @ts-ignore
         controls.update()
     }
@@ -299,7 +312,6 @@ if (instructions && havePointerLock) {
         element.requestPointerLock()
     })
     // document.addEventListener('keyup', (event: KeyboardEvent) => {
-    //     console.log(event)
     //     if (event.code === 'Space') {
     //         element.requestPointerLock()
     //     }
