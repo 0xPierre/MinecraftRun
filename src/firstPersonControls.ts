@@ -154,7 +154,7 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
 
     }
 
-    scope.update = function () {
+    scope.update = function (minY: int = 0) {
 
         let time = performance.now()
         let delta = (time - prevTime) / 1000
@@ -190,15 +190,25 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
         // scope.getObject().translateX(-velocity.x * delta)
         // scope.getObject().translateZ(velocity.z * delta)
 
-        scope.getObject().position.y += (velocity.y * delta)
+        if (scope.getObject().position.y-height >= minY) {
+            scope.getObject().position.y += (velocity.y * delta)
+        }
+
 
         if (scope.getObject().position.y < scope.height) {
-
             velocity.y = 0
             scope.getObject().position.y = scope.height
 
             canJump = true
+        } else if (minY != 0 && scope.getObject().position.y < scope.height+minY) {
+            velocity.y = minY
+            scope.getObject().position.y = scope.height + minY
+
+            canJump = true
         }
+        // console.log(canJump)
+
+  
         prevTime = time
     }
 }

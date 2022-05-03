@@ -195,7 +195,7 @@ function init() {
     // @ts-ignore
     scene.add(controls.getObject())
 
-    raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 )
+    raycaster = new THREE.Raycaster(new THREE.Vector3(0, 0, 0), new THREE.Vector3( 0, - 1, 0 ), 0, 5 )
 
     let rowZ = 0
     const deep = 20
@@ -255,15 +255,29 @@ function animate() {
     // @ts-ignore
     if (controls.enabled === true) {
         // @ts-ignore
-        raycaster.ray.origin.copy( controls.getObject().position );
-        // raycaster.ray.origin.y = 0
+        raycaster.ray.origin.copy( controls.getObject().position )
+        // raycaster.ray.origin.y = 1
 
         const intersections = raycaster.intersectObjects(obstacles, true)
         // @ts-ignore
-        console.log(intersections, obstacles[0].position, raycaster.ray.origin)
+        // console.log(intersections, obstacles[0].position, raycaster.ray.origin)
+        
+        let minY = 0
+        if (intersections.length > 0) {
+            const object = intersections[0]
+            // @ts-ignore
+            if (object.distance === 0.5) {
+                // @ts-ignore
+                controls.enabled === false
+                // console.log('Perdu')
+            } else {
+                console.log(object)
+                minY = object.object.position.y
+            }
+        }
 
         // @ts-ignore
-        controls.update()
+        controls.update(minY=minY)
     }
     stats.end()
 
