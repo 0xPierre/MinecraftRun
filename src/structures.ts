@@ -83,14 +83,77 @@ const woodLine = (x: number, y: number, z:number, width: number, height: number)
 }
 
 
+const grassFloor = (z: number, width: number = 7, depth: number = 20) => {
+    const texture = loader.load(require('./assets/blocks/grass.jpg').default)
+
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set( width, depth )
+
+    const geometry = new THREE.BoxGeometry(width, 1 ,depth)
+
+    const material = new THREE.MeshPhongMaterial({
+        map: texture,
+    })
+    const floor = new THREE.Mesh(geometry, material)
+
+    floor.position.x = 0
+    floor.position.y = 0
+    floor.position.z = (z - depth / 2) + 0.5
+
+    return floor
+}
+
+const stoneWall = (x: number, y: number, z: number,width: number = 1, height: number = 2, depth: number = 20) => {
+    const texture = loader.load(require('./assets/blocks/stone.jpg').default)
+
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set( depth, height )
+
+    const geometry = new THREE.BoxGeometry(width, height ,depth)
+
+    const material = new THREE.MeshPhongMaterial({
+        map: texture,
+    })
+    const floor = new THREE.Mesh(geometry, material)
+
+    floor.position.x = x
+    floor.position.y = y + 0.5
+    floor.position.z = (z - depth / 2) + 0.5
+
+    return floor
+}
+
+const grassWall = (x: number, y: number, z: number, width: number = 1, height: number = 2, depth: number = 20) => {
+    const texture = loader.load(require('./assets/blocks/grass.jpg').default)
+
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set( depth, height )
+
+    const geometry = new THREE.BoxGeometry(width, height ,depth)
+
+    const material = new THREE.MeshPhongMaterial({
+        map: texture,
+    })
+    const floor = new THREE.Mesh(geometry, material)
+
+    floor.position.x = x
+    floor.position.y = y
+    floor.position.z = (z - depth / 2) + 0.5
+
+    return floor
+}
+
+
 export {
     Grass,
-    grassTexture,
     Dirt,
-    dirtTexture,
     Stone,
-    stoneTexture,
     Wood,
-    woodTexture,
     woodLine,
+    grassFloor,
+    stoneWall,
+    grassWall,
 }

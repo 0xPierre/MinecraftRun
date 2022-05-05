@@ -6,14 +6,13 @@ import firstPersonControls from './firstPersonControls'
 
 import {
     Grass,
-    grassTexture,
     Dirt,
-    dirtTexture,
     Stone,
-    stoneTexture,
     Wood,
-    woodTexture,
     woodLine,
+    grassFloor,
+    stoneWall,
+    grassWall,
 } from './structures'
 
 const loader = new THREE.TextureLoader()
@@ -62,88 +61,108 @@ const constructObstacle = (z: number) => {
     return group
 }
 
+
 function constructRows(x: number, z: number, width: number, deep: number) {
+    console.log(z)
+    z = -z
     const group = new THREE.Group()
+
+    // Sol en herbe
+    const floor = grassFloor(z)
+    group.add(floor)
+
+    // On gère la partie gauche
+    const wallLeft = stoneWall(-4, 1, z)
+    group.add(wallLeft)
+    const grassLineTopLeft = grassWall(-5, 3, z, 1, 1)
+    group.add(grassLineTopLeft)
+
+    // On gère la partie droite
+    const wallRight = stoneWall(4, 1, z)
+    group.add(wallRight)
+    const grassLineTopRight = grassWall(5, 3, z, 1, 1)
+    group.add(grassLineTopRight)
+
     const obstaclesToGenerate = Math.floor(Math.random() * 3) + 1
     
     const obstaclesThreshold = deep / obstaclesToGenerate
     let obstaclesLastPosition = 0
 
     for (let i = z; i < z + deep; i++) {
-        for (let j = x - 1; j < x + width + 1; j++) {
-            const g = Grass(j, 0, -i)
-            group.add(g)
-        }
+        // for (let j = x - 1; j < x + width + 1; j++) {
+        //     const g = Grass(j, 0, i)
+        //     group.add(g)
+        // }
 
-        // 
+        
         // On gère la droite
-        // 
+        
         let XWall = x + width
-        let hasFirstOnRight = false
-        if (Math.random() > 0.4) {
-            hasFirstOnRight = true
-            group.add(Stone(XWall, 1, -i))
-        } else {
-            group.add(Stone(XWall + 1, 1, -i))
-            if (Math.random() > 0.8) {
-                group.add(Dirt(XWall, 1, -i))
-            }
-        }
+        // let hasFirstOnRight = false
+        // if (Math.random() > 0.4) {
+        //     hasFirstOnRight = true
+        //     group.add(Stone(XWall, 1, i))
+        // } else {
+        //     group.add(Stone(XWall + 1, 1, i))
+        //     if (Math.random() > 0.8) {
+        //         group.add(Dirt(XWall, 1, i))
+        //     }
+        // }
 
-        let hasSecondOnFirstOnRight = false
-        if (hasFirstOnRight) {
-            if (Math.random() > 0.6) {
-                group.add(Stone(XWall, 2, -i))
-                hasSecondOnFirstOnRight = true
-            } else {
-                group.add(Stone(XWall + 1, 2, -i))
-            }
-        } else {
-            group.add(Stone(XWall + 1, 2, -i))
-        }
+        // let hasSecondOnFirstOnRight = false
+        // if (hasFirstOnRight) {
+        //     if (Math.random() > 0.6) {
+        //         group.add(Stone(XWall, 2, i))
+        //         hasSecondOnFirstOnRight = true
+        //     } else {
+        //         group.add(Stone(XWall + 1, 2, i))
+        //     }
+        // } else {
+        //     group.add(Stone(XWall + 1, 2, i))
+        // }
 
-        if (hasSecondOnFirstOnRight) {
-            group.add(Grass(XWall + 1, 3, -i))
-        } else if (Math.random() > 0.8) {
-            group.add(Grass(XWall + 1, 3, -i))
-        } else {
-            group.add(Grass(XWall + 2, 3, -i))
-        }
+        // if (hasSecondOnFirstOnRight) {
+        //     group.add(Grass(XWall + 1, 3, i))
+        // } else if (Math.random() > 0.8) {
+        //     group.add(Grass(XWall + 1, 3, i))
+        // } else {
+        //     group.add(Grass(XWall + 2, 3, i))
+        // }
 
         // 
         // On gère la gauche
         // 
         XWall = x - 1
-        let hasFirstOnLeft = false
-        if (Math.random() > 0.4) {
-            hasFirstOnLeft = true
-            group.add(Stone(XWall, 1, -i))
-        } else {
-            group.add(Stone(XWall - 1, 1, -i))
-            if (Math.random() > 0.8) {
-                group.add(Dirt(XWall, 1, -i))
-            }
-        }
+        // let hasFirstOnLeft = false
+        // if (Math.random() > 0.4) {
+        //     hasFirstOnLeft = true
+        //     group.add(Stone(XWall, 1, i))
+        // } else {
+        //     group.add(Stone(XWall - 1, 1, i))
+        //     if (Math.random() > 0.8) {
+        //         group.add(Dirt(XWall, 1, i))
+        //     }
+        // }
 
-        let hasSecondOnFirstOnLeft = false
-        if (hasFirstOnLeft) {
-            if (Math.random() > 0.6) {
-                group.add(Stone(XWall, 2, -i))
-                hasSecondOnFirstOnLeft = true
-            } else {
-                group.add(Stone(XWall - 1, 2, -i))
-            }
-        } else {
-            group.add(Stone(XWall - 1, 2, -i))
-        }
+        // let hasSecondOnFirstOnLeft = false
+        // if (hasFirstOnLeft) {
+        //     if (Math.random() > 0.6) {
+        //         group.add(Stone(XWall, 2, i))
+        //         hasSecondOnFirstOnLeft = true
+        //     } else {
+        //         group.add(Stone(XWall - 1, 2, i))
+        //     }
+        // } else {
+        //     group.add(Stone(XWall - 1, 2, i))
+        // }
 
-        if (hasSecondOnFirstOnLeft) {
-            group.add(Grass(XWall - 1, 3, -i))
-        } else if (Math.random() > 0.8) {
-            group.add(Grass(XWall - 1, 3, -i))
-        } else {
-            group.add(Grass(XWall - 2, 3, -i))
-        }
+        // if (hasSecondOnFirstOnLeft) {
+        //     group.add(Grass(XWall - 1, 3, i))
+        // } else if (Math.random() > 0.8) {
+        //     group.add(Grass(XWall - 1, 3, i))
+        // } else {
+        //     group.add(Grass(XWall - 2, 3, i))
+        // }
 
         // On gère les obstacles
 
@@ -151,10 +170,10 @@ function constructRows(x: number, z: number, width: number, deep: number) {
 
         if (obstaclesLastPosition >= obstaclesThreshold) {
             obstaclesLastPosition = 0
-            // const wood = Wood(XWall+2, 1, -i)
+            // const wood = Wood(XWall+2, 1, i)
             // obstacles.push(wood)
             // group.add(wood)
-            const obstacle = constructObstacle(-i)
+            const obstacle = constructObstacle(i)
             group.add(obstacle)
         }
     }
@@ -268,8 +287,8 @@ function animate() {
             // @ts-ignore
             if (object.distance === 0.5) {
                 // @ts-ignore
-                controls.enabled === false
-                // console.log('Perdu')
+                // controls.enabled = false
+                console.log('Perdu')
             } else {
                 console.log(object)
                 minY = object.object.position.y
