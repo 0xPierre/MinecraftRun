@@ -1,6 +1,9 @@
 import * as THREE from 'three'
-import { LineBasicMaterial } from 'three'
-const loader = new THREE.TextureLoader()
+// @ts-ignore
+import { GLTFLoader } from './jsm/loaders/GLTFLoader.js'
+const gltfLoader = new GLTFLoader()
+const loader = new THREE.TextureLoader()    
+
 
 const grassTexture = loader.load(require('./assets/blocks/grass.jpg').default)
 const dirtTexture = loader.load(require('./assets/blocks/dirt.jpg').default)
@@ -146,6 +149,38 @@ const grassWall = (x: number, y: number, z: number, width: number = 1, height: n
     return floor
 }
 
+const flowerPot = (x: number, y: number, z:number) => {
+    loader.load(
+        // resource URL
+        require('./assets/blocks/pot.gltf').default,
+        // called when the resource is loaded
+        function ( gltf ) {
+    
+           console.log(gltf)
+        //    scene.add( gltf.scene );
+
+		// gltf.animations; // Array<THREE.AnimationClip>
+		// gltf.scene; // THREE.Group
+		// gltf.scenes; // Array<THREE.Group>
+		// gltf.cameras; // Array<THREE.Camera>
+		// gltf.asset; // Object
+    
+        },
+        // called while loading is progressing
+        function ( xhr ) {
+    
+            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+    
+        },
+        // called when loading has errors
+        function ( error ) {
+    
+            console.log( 'An error happened' );
+    
+        }
+    );
+}
+
 
 export {
     Grass,
@@ -156,4 +191,5 @@ export {
     grassFloor,
     stoneWall,
     grassWall,
+    flowerPot,
 }

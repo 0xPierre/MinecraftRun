@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import * as CANNON from 'cannon-es'
 // @ts-ignore
 import Stats from 'three/examples/jsm/libs/stats.module'
 import firstPersonControls from './firstPersonControls'
@@ -13,17 +12,20 @@ import {
     grassFloor,
     stoneWall,
     grassWall,
+    flowerPot,
 } from './structures'
 
-const loader = new THREE.TextureLoader()
 
 let camera: THREE.PerspectiveCamera,
-    world: THREE.Group, scene: THREE.Scene,
-    renderer: THREE.WebGLRenderer,
-    controls: typeof firstPersonControls,
-    rows: THREE.Group[] = [],
-    obstacles: THREE.Mesh[] = [],
-    raycaster: THREE.Raycaster
+world: THREE.Group, scene: THREE.Scene,
+renderer: THREE.WebGLRenderer,
+controls: typeof firstPersonControls,
+rows: THREE.Group[] = [],
+obstacles: THREE.Mesh[] = [],
+raycaster: THREE.Raycaster
+
+const musicListener = new THREE.AudioListener
+const backgroundMusic = new THREE.Audio(musicListener)
 
 const constructObstacle = (z: number) => {
     const random = Math.random()
@@ -62,10 +64,11 @@ const constructObstacle = (z: number) => {
 }
 
 
-function constructRows(x: number, z: number, width: number, deep: number) {
-    console.log(z)
+function constructRows(x: number, z: number, width: number, deep: number, useObstacle: boolean = true) {
     z = -z
     const group = new THREE.Group()
+
+    const flower = flowerPot(1, 1, 1)
 
     // Sol en herbe
     const floor = grassFloor(z)
@@ -83,6 +86,20 @@ function constructRows(x: number, z: number, width: number, deep: number) {
     const grassLineTopRight = grassWall(5, 3, z, 1, 1)
     group.add(grassLineTopRight)
 
+    // let addStoneBefore
+    for (let i =z; i > z - deep; i--) {
+        if (Math.random() > 0.40) {
+            group.add(Stone(-3, 1, i))
+
+            if (Math.random() > 0.60) {
+                group.add(Stone(-3, 2, i))
+            }
+        } else if (Math.random() > 0.70) {
+            group.add(Dirt(-3, 1, i))
+        }
+    }
+
+
     const obstaclesToGenerate = Math.floor(Math.random() * 3) + 1
     
     const obstaclesThreshold = deep / obstaclesToGenerate
@@ -98,36 +115,36 @@ function constructRows(x: number, z: number, width: number, deep: number) {
         // On gère la droite
         
         let XWall = x + width
-        // let hasFirstOnRight = false
-        // if (Math.random() > 0.4) {
-        //     hasFirstOnRight = true
-        //     group.add(Stone(XWall, 1, i))
-        // } else {
-        //     group.add(Stone(XWall + 1, 1, i))
-        //     if (Math.random() > 0.8) {
-        //         group.add(Dirt(XWall, 1, i))
-        //     }
-        // }
+        let hasFirstOnRight = false
+        if (Math.random() > 0.4) {
+            hasFirstOnRight = true
+            group.add(Stone(XWall, 1, i))
+        } else {
+            group.add(Stone(XWall + 1, 1, i))
+            if (Math.random() > 0.8) {
+                group.add(Dirt(XWall, 1, i))
+            }
+        }
 
-        // let hasSecondOnFirstOnRight = false
-        // if (hasFirstOnRight) {
-        //     if (Math.random() > 0.6) {
-        //         group.add(Stone(XWall, 2, i))
-        //         hasSecondOnFirstOnRight = true
-        //     } else {
-        //         group.add(Stone(XWall + 1, 2, i))
-        //     }
-        // } else {
-        //     group.add(Stone(XWall + 1, 2, i))
-        // }
+        let hasSecondOnFirstOnRight = false
+        if (hasFirstOnRight) {
+            if (Math.random() > 0.6) {
+                group.add(Stone(XWall, 2, i))
+                hasSecondOnFirstOnRight = true
+            } else {
+                group.add(Stone(XWall + 1, 2, i))
+            }
+        } else {
+            group.add(Stone(XWall + 1, 2, i))
+        }
 
-        // if (hasSecondOnFirstOnRight) {
-        //     group.add(Grass(XWall + 1, 3, i))
-        // } else if (Math.random() > 0.8) {
-        //     group.add(Grass(XWall + 1, 3, i))
-        // } else {
-        //     group.add(Grass(XWall + 2, 3, i))
-        // }
+        if (hasSecondOnFirstOnRight) {
+            group.add(Grass(XWall + 1, 3, i))
+        } else if (Math.random() > 0.8) {
+            group.add(Grass(XWall + 1, 3, i))
+        } else {
+            group.add(Grass(XWall + 2, 3, i))
+        }
 
         // 
         // On gère la gauche
@@ -166,15 +183,17 @@ function constructRows(x: number, z: number, width: number, deep: number) {
 
         // On gère les obstacles
 
-        obstaclesLastPosition += 1
+        if (useObstacle) {
+            obstaclesLastPosition += 1
 
-        if (obstaclesLastPosition >= obstaclesThreshold) {
-            obstaclesLastPosition = 0
-            // const wood = Wood(XWall+2, 1, i)
-            // obstacles.push(wood)
-            // group.add(wood)
-            const obstacle = constructObstacle(i)
-            group.add(obstacle)
+            if (obstaclesLastPosition >= obstaclesThreshold) {
+                obstaclesLastPosition = 0
+                // const wood = Wood(XWall+2, 1, i)
+                // obstacles.push(wood)
+                // group.add(wood)
+                const obstacle = constructObstacle(i)
+                group.add(obstacle)
+            }
         }
     }
 
@@ -189,6 +208,14 @@ function init() {
         0.1,
         1000
     )
+    // Musique
+
+    const audioLoader = new THREE.AudioLoader()
+    audioLoader.load(require('./assets/kirky-theme.mp3').default, buffer => {
+        backgroundMusic.setBuffer( buffer );
+        backgroundMusic.setLoop( true );
+        backgroundMusic.setVolume( 1 );
+    })
 
     world = new THREE.Group()
 
@@ -216,9 +243,7 @@ function init() {
 
     raycaster = new THREE.Raycaster(new THREE.Vector3(0, 0, 0), new THREE.Vector3( 0, - 1, 0 ), 0, 5 )
 
-    let rowZ = 0
-    const deep = 20
-    const row = constructRows(-2, rowZ, 5, deep)
+    const row = constructRows(-2, 0, 5, 20, false)
     world.add(row)
 
     let color = 0xFFFFFF;
@@ -241,7 +266,7 @@ function init() {
 
 
 const GENERATION_DEEP = 20
-const GENERATION_THRESHOLD = GENERATION_DEEP * 3
+const GENERATION_THRESHOLD = GENERATION_DEEP * 20
 let lastGenerated = 20
 let lastDestroyed = 20
 
@@ -330,11 +355,13 @@ if (instructions && havePointerLock) {
             controls.enabled = true
             // @ts-ignore
             instructions.style.display = 'none'
+            backgroundMusic.play()
         } else {
             // @ts-ignore
             controls.enabled = false
             // @ts-ignore
             instructions.style.display = ''
+            backgroundMusic.stop()
         }
     }
 
@@ -344,9 +371,4 @@ if (instructions && havePointerLock) {
         // @ts-ignore
         element.requestPointerLock()
     })
-    // document.addEventListener('keyup', (event: KeyboardEvent) => {
-    //     if (event.code === 'Space') {
-    //         element.requestPointerLock()
-    //     }
-    // })
 }
