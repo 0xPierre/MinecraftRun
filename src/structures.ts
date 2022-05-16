@@ -149,36 +149,43 @@ const grassWall = (x: number, y: number, z: number, width: number = 1, height: n
     return floor
 }
 
-const flowerPot = (x: number, y: number, z:number) => {
-    loader.load(
-        // resource URL
-        require('./assets/blocks/pot.gltf').default,
-        // called when the resource is loaded
-        function ( gltf ) {
-    
-           console.log(gltf)
-        //    scene.add( gltf.scene );
 
-		// gltf.animations; // Array<THREE.AnimationClip>
-		// gltf.scene; // THREE.Group
-		// gltf.scenes; // Array<THREE.Group>
-		// gltf.cameras; // Array<THREE.Camera>
-		// gltf.asset; // Object
-    
-        },
-        // called while loading is progressing
-        function ( xhr ) {
-    
-            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-    
-        },
-        // called when loading has errors
-        function ( error ) {
-    
-            console.log( 'An error happened' );
-    
-        }
-    );
+const FlowerPot = async (x: number, y: number, z: number, group: THREE.Group) => {
+    const url = '/dist/models/flowerPot/scene.gltf'
+    const pot = await gltfLoader.load(url, (pot: any) => {
+        group.add(pot.scene)
+
+        pot.scene.position.x = x
+        pot.scene.position.y = y
+        pot.scene.position.z = z
+    })
+
+}
+
+
+
+const Fox = async (x: number, y: number, z: number, group: THREE.Group) => {
+    const url = '/dist/models/fox/scene.gltf'
+    const fox = await gltfLoader.load(url, (gltf: any) => {
+        group.add(gltf.scene)
+        
+        
+
+        gltf.scene.position.x = x
+        gltf.scene.position.y = y
+        gltf.scene.position.z = z
+
+        console.log(gltf)
+
+        // const mixer = new THREE.AnimationMixer( gltf.scene );
+        // gltf.animations.forEach( ( clip: any ) => {
+        //     console.log(clip, mixer)
+        //     mixer.clipAction( clip ).play();
+          
+        // } )
+    })
+
+    // return mi
 }
 
 
@@ -191,5 +198,6 @@ export {
     grassFloor,
     stoneWall,
     grassWall,
-    flowerPot,
+    FlowerPot,
+    Fox,
 }

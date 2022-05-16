@@ -32,6 +32,10 @@ module.exports = {
           name: '[name].[ext]',
         },
       },
+      {
+        test: /\.gltf/,
+        type: 'asset/resource',
+      },
     ]
   },
   watchOptions: {

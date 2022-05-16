@@ -12,7 +12,8 @@ import {
     grassFloor,
     stoneWall,
     grassWall,
-    flowerPot,
+    Fox,
+    FlowerPot,
 } from './structures'
 
 
@@ -68,8 +69,6 @@ function constructRows(x: number, z: number, width: number, deep: number, useObs
     z = -z
     const group = new THREE.Group()
 
-    const flower = flowerPot(1, 1, 1)
-
     // Sol en herbe
     const floor = grassFloor(z)
     group.add(floor)
@@ -80,13 +79,14 @@ function constructRows(x: number, z: number, width: number, deep: number, useObs
     const grassLineTopLeft = grassWall(-5, 3, z, 1, 1)
     group.add(grassLineTopLeft)
 
+    
     // On gère la partie droite
     const wallRight = stoneWall(4, 1, z)
     group.add(wallRight)
     const grassLineTopRight = grassWall(5, 3, z, 1, 1)
     group.add(grassLineTopRight)
-
-    // let addStoneBefore
+    
+    
     for (let i =z; i > z - deep; i--) {
         if (Math.random() > 0.40) {
             group.add(Stone(-3, 1, i))
@@ -96,108 +96,55 @@ function constructRows(x: number, z: number, width: number, deep: number, useObs
             }
         } else if (Math.random() > 0.70) {
             group.add(Dirt(-3, 1, i))
+            if (Math.random() > 0.60) {
+                FlowerPot(-3, 1.5, i, group)
+            }
+        }
+
+        if (Math.random() > 0.7) {
+            group.add(Grass(4, 3, i))
+        }
+
+        if (Math.random() > 0.40) {
+            group.add(Stone(3, 1, i))
+
+            if (Math.random() > 0.60) {
+                group.add(Stone(3, 2, i))
+            }
+        } else if (Math.random() > 0.70) {
+            group.add(Dirt(3, 1, i))
+            if (Math.random() > 0.60) {
+                FlowerPot(3, 1.5, i, group)
+            }
+        }
+
+        if (Math.random() > 0.7) {
+            group.add(Grass(4, 3, i))
         }
     }
 
-
-    const obstaclesToGenerate = Math.floor(Math.random() * 3) + 1
+    // const obstaclesToGenerate = Math.floor(Math.random() * 3) + 1
     
-    const obstaclesThreshold = deep / obstaclesToGenerate
-    let obstaclesLastPosition = 0
+    // const obstaclesThreshold = deep / obstaclesToGenerate
+    // let obstaclesLastPosition = 0
 
-    for (let i = z; i < z + deep; i++) {
-        // for (let j = x - 1; j < x + width + 1; j++) {
-        //     const g = Grass(j, 0, i)
-        //     group.add(g)
-        // }
+    
 
-        
-        // On gère la droite
-        
-        let XWall = x + width
-        let hasFirstOnRight = false
-        if (Math.random() > 0.4) {
-            hasFirstOnRight = true
-            group.add(Stone(XWall, 1, i))
-        } else {
-            group.add(Stone(XWall + 1, 1, i))
-            if (Math.random() > 0.8) {
-                group.add(Dirt(XWall, 1, i))
-            }
-        }
+    //     if (useObstacle) {
+    //         obstaclesLastPosition += 1
 
-        let hasSecondOnFirstOnRight = false
-        if (hasFirstOnRight) {
-            if (Math.random() > 0.6) {
-                group.add(Stone(XWall, 2, i))
-                hasSecondOnFirstOnRight = true
-            } else {
-                group.add(Stone(XWall + 1, 2, i))
-            }
-        } else {
-            group.add(Stone(XWall + 1, 2, i))
-        }
+    //         if (obstaclesLastPosition >= obstaclesThreshold) {
+    //             obstaclesLastPosition = 0
+    //             // const wood = Wood(XWall+2, 1, i)
+    //             // obstacles.push(wood)
+    //             // group.add(wood)
+    //             const obstacle = constructObstacle(i)
+    //             group.add(obstacle)
+    //         }
+    //     }
+    // }
 
-        if (hasSecondOnFirstOnRight) {
-            group.add(Grass(XWall + 1, 3, i))
-        } else if (Math.random() > 0.8) {
-            group.add(Grass(XWall + 1, 3, i))
-        } else {
-            group.add(Grass(XWall + 2, 3, i))
-        }
-
-        // 
-        // On gère la gauche
-        // 
-        XWall = x - 1
-        // let hasFirstOnLeft = false
-        // if (Math.random() > 0.4) {
-        //     hasFirstOnLeft = true
-        //     group.add(Stone(XWall, 1, i))
-        // } else {
-        //     group.add(Stone(XWall - 1, 1, i))
-        //     if (Math.random() > 0.8) {
-        //         group.add(Dirt(XWall, 1, i))
-        //     }
-        // }
-
-        // let hasSecondOnFirstOnLeft = false
-        // if (hasFirstOnLeft) {
-        //     if (Math.random() > 0.6) {
-        //         group.add(Stone(XWall, 2, i))
-        //         hasSecondOnFirstOnLeft = true
-        //     } else {
-        //         group.add(Stone(XWall - 1, 2, i))
-        //     }
-        // } else {
-        //     group.add(Stone(XWall - 1, 2, i))
-        // }
-
-        // if (hasSecondOnFirstOnLeft) {
-        //     group.add(Grass(XWall - 1, 3, i))
-        // } else if (Math.random() > 0.8) {
-        //     group.add(Grass(XWall - 1, 3, i))
-        // } else {
-        //     group.add(Grass(XWall - 2, 3, i))
-        // }
-
-        // On gère les obstacles
-
-        if (useObstacle) {
-            obstaclesLastPosition += 1
-
-            if (obstaclesLastPosition >= obstaclesThreshold) {
-                obstaclesLastPosition = 0
-                // const wood = Wood(XWall+2, 1, i)
-                // obstacles.push(wood)
-                // group.add(wood)
-                const obstacle = constructObstacle(i)
-                group.add(obstacle)
-            }
-        }
-    }
-
-    rows.push(group)
+    // rows.push(group)
 
     return group
 }
@@ -259,7 +206,12 @@ function init() {
     scene.add(light);
     scene.add(light.target)
 
+    // const flower = flowerPot(1, 1, 1, world)
+    // console.log(flower)
+    const fox = Fox(1, 1, 1, world)
+
     scene.add(world)
+
 }
 
 
