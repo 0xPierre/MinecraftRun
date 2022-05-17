@@ -2,6 +2,8 @@ import * as THREE from 'three'
 // @ts-ignore
 import Stats from 'three/examples/jsm/libs/stats.module'
 import firstPersonControls from './firstPersonControls'
+// @ts-ignore
+import { Sky } from './jsm/objects/sky'
 
 import {
     Grass,
@@ -23,10 +25,19 @@ renderer: THREE.WebGLRenderer,
 controls: typeof firstPersonControls,
 rows: THREE.Group[] = [],
 obstacles: THREE.Mesh[] = [],
-raycaster: THREE.Raycaster
+raycaster: THREE.Raycaster,
+sky: Sky,
+sun: THREE.Vector3
 
 const musicListener = new THREE.AudioListener
 const backgroundMusic = new THREE.Audio(musicListener)
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight
+    camera.updateProjectionMatrix()
+
+    renderer.setSize(window.innerWidth, window.innerHeight)
+}
 
 const constructObstacle = (z: number) => {
     const random = Math.random()
@@ -60,7 +71,6 @@ const constructObstacle = (z: number) => {
         // obstacles.push(wood)
         // group.add(wood)
     // }
-
     return group
 }
 
@@ -121,33 +131,89 @@ function constructRows(x: number, z: number, width: number, deep: number, useObs
         if (Math.random() > 0.7) {
             group.add(Grass(4, 3, i))
         }
+        if (Math.random() > 0.75) {
+            group.add(Grass(-4, 3, i))
+        }
     }
 
-    // const obstaclesToGenerate = Math.floor(Math.random() * 3) + 1
-    
-    // const obstaclesThreshold = deep / obstaclesToGenerate
+    const obstaclesToGenerate = Math.floor(Math.random() * 3) + 1
+    const obstaclesThreshold = deep / obstaclesToGenerate
+    let lastXObstacle = 0
+
+    for (let i=0; i < obstaclesToGenerate; i++) {
+        lastXObstacle += obstaclesThreshold
+        
+        const obstacle = constructObstacle(0)
+        group.add(obstacle)
+
+        lastXObstacle = 0
+    }
+
     // let obstaclesLastPosition = 0
 
     
 
-    //     if (useObstacle) {
-    //         obstaclesLastPosition += 1
+    // if (useObstacle) {
+    //     obstaclesLastPosition += 1
 
-    //         if (obstaclesLastPosition >= obstaclesThreshold) {
-    //             obstaclesLastPosition = 0
-    //             // const wood = Wood(XWall+2, 1, i)
-    //             // obstacles.push(wood)
-    //             // group.add(wood)
-    //             const obstacle = constructObstacle(i)
-    //             group.add(obstacle)
-    //         }
+    //     if (obstaclesLastPosition >= obstaclesThreshold) {
+    //         obstaclesLastPosition = 0
+    //         // const wood = Wood(XWall+2, 1, i)
+    //         // obstacles.push(wood)
+    //         // group.add(wood)
+    //         const obstacle = constructObstacle(0)
+    //         group.add(obstacle)
     //     }
     // }
 
-    // rows.push(group)
+    rows.push(group)
 
     return group
 }
+function initSky() {
+
+    // Add Sky
+    sky = new Sky();
+    sky.scale.setScalar( 450000 );
+    scene.add( sky );
+
+    sun = new THREE.Vector3();
+
+    /// GUI
+
+    const effectController = {
+        turbidity: 10,
+        rayleigh: 3,
+        mieCoefficient: 0.001,
+        mieDirectionalG: 0.7,
+        elevation: 2,
+        azimuth: 180,
+        exposure: renderer.toneMappingExposure
+    };
+
+    function guiChanged() {
+
+        const uniforms = sky.material.uniforms;
+        uniforms[ 'turbidity' ].value = effectController.turbidity;
+        uniforms[ 'rayleigh' ].value = effectController.rayleigh;
+        uniforms[ 'mieCoefficient' ].value = effectController.mieCoefficient;
+        uniforms[ 'mieDirectionalG' ].value = effectController.mieDirectionalG;
+
+        const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
+        const theta = THREE.MathUtils.degToRad( effectController.azimuth );
+
+        sun.setFromSphericalCoords( 1, phi, theta );
+
+        uniforms[ 'sunPosition' ].value.copy( sun );
+
+        renderer.toneMappingExposure = effectController.exposure;
+        renderer.render( scene, camera );
+
+    }
+
+    guiChanged()
+}
+
 
 function init() {
     camera = new THREE.PerspectiveCamera(75,
@@ -156,7 +222,6 @@ function init() {
         1000
     )
     // Musique
-
     const audioLoader = new THREE.AudioLoader()
     audioLoader.load(require('./assets/kirky-theme.mp3').default, buffer => {
         backgroundMusic.setBuffer( buffer );
@@ -170,14 +235,11 @@ function init() {
     const axesHelper = new THREE.AxesHelper(10)
     scene.add(axesHelper)
 
-    scene.background = new THREE.Color(0xffffff)
-    // scene.fog = new THREE.Fog(0xffffff, 0, 2000)
-
     renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    // renderer.shadowMap.enabled = true
+    // renderer.shadowMap.type = THREE.PCFSoftShadowMap
     document.body.appendChild(renderer.domElement)
     renderer.outputEncoding = THREE.sRGBEncoding
 
@@ -194,12 +256,12 @@ function init() {
     world.add(row)
 
     let color = 0xFFFFFF;
-    let intensity = 1;
+    let intensity = .65;
     const light2 = new THREE.AmbientLight(color, intensity);
     scene.add(light2);
 
     color = 0xFFFFFF;
-    intensity = .5;
+    intensity = .2;
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(0, 2, 5);
     light.target.position.set(0, 2, -5);
@@ -215,6 +277,13 @@ function init() {
 }
 
 
+const updateCounter = setInterval(() => {
+    const counter = document.querySelector('#score-counter')
+    if (counter) {
+        // @ts-ignore
+        counter.textContent = parseInt(counter.textContent || 0) + 1
+    }
+}, 1000)
 
 
 const GENERATION_DEEP = 20
@@ -252,11 +321,8 @@ function animate() {
     if (controls.enabled === true) {
         // @ts-ignore
         raycaster.ray.origin.copy( controls.getObject().position )
-        // raycaster.ray.origin.y = 1
 
         const intersections = raycaster.intersectObjects(obstacles, true)
-        // @ts-ignore
-        // console.log(intersections, obstacles[0].position, raycaster.ray.origin)
         
         let minY = 0
         if (intersections.length > 0) {
@@ -266,6 +332,7 @@ function animate() {
                 // @ts-ignore
                 // controls.enabled = false
                 console.log('Perdu')
+                clearInterval(updateCounter)
             } else {
                 console.log(object)
                 minY = object.object.position.y
@@ -283,15 +350,11 @@ function animate() {
     stats.update()
 }
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight
-    camera.updateProjectionMatrix()
 
-    renderer.setSize(window.innerWidth, window.innerHeight)
-}
 
 
 init()
+initSky()
 animate()
 
 

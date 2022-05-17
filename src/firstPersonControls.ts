@@ -154,6 +154,8 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
 
     }
 
+    yawObject.position.y = 2
+
     scope.update = function (minY: int = 0) {
 
         let time = performance.now()

@@ -163,28 +163,22 @@ const FlowerPot = async (x: number, y: number, z: number, group: THREE.Group) =>
 }
 
 
-
 const Fox = async (x: number, y: number, z: number, group: THREE.Group) => {
     const url = '/dist/models/fox/scene.gltf'
     const fox = await gltfLoader.load(url, (gltf: any) => {
         group.add(gltf.scene)
-        
-        
 
         gltf.scene.position.x = x
         gltf.scene.position.y = y
         gltf.scene.position.z = z
 
-        console.log(gltf)
-
-        // const mixer = new THREE.AnimationMixer( gltf.scene );
+        const mixer = new THREE.AnimationMixer( gltf.scene );
         // gltf.animations.forEach( ( clip: any ) => {
-        //     console.log(clip, mixer)
         //     mixer.clipAction( clip ).play();
           
         // } )
     })
-
+    
     // return mi
 }
 
