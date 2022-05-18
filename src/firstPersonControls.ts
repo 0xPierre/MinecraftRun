@@ -10,8 +10,9 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
     scope.height = height
     scope.jumpHeight = jumpHeight
     scope.click = false
-    scope.autoForward = false
-    scope.mouseDirection = true
+    scope.autoForward = true
+    scope.mouseDirection = false
+    scope.prevTime = performance.now()
 
     let moveForward = false
     let moveBackward = false
@@ -23,7 +24,6 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
     let velocity = new THREE.Vector3()
     let direction = new THREE.Vector3()
 
-    let prevTime = performance.now()
 
     camera.rotation.set(0, 0, 0)
 
@@ -159,7 +159,7 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
     scope.update = function (minY: int = 0) {
 
         let time = performance.now()
-        let delta = (time - prevTime) / 1000
+        let delta = (time - scope.prevTime) / 1000
 
         velocity.y -= 9.8 * 4 * delta
         velocity.x -= velocity.x * 10.0 * delta
@@ -168,7 +168,6 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
         velocity.z -= velocity.z * 10.0 * delta
         direction.z = Number(moveForward) - Number(moveBackward)
         direction.normalize()
-
 
         let currentSpeed = scope.speed
         if (run && (moveForward || scope.autoForward || moveBackward || moveLeft || moveRight)) currentSpeed = currentSpeed + (currentSpeed * 1.1)
@@ -186,31 +185,22 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
             yawObject.translateZ(currentSpeed * delta)
         }
 
-        // if (moveForward || moveBackward) velocity.z -= direction.z * currentSpeed * delta
-        // if (moveLeft || moveRight) velocity.x -= direction.x * currentSpeed * delta
-
-        // scope.getObject().translateX(-velocity.x * delta)
-        // scope.getObject().translateZ(velocity.z * delta)
-
-        if (scope.getObject().position.y-height >= minY) {
+        if (scope.getObject().position.y - height >= minY) {
             scope.getObject().position.y += (velocity.y * delta)
         }
-
 
         if (scope.getObject().position.y < scope.height) {
             velocity.y = 0
             scope.getObject().position.y = scope.height
 
             canJump = true
-        } else if (minY != 0 && scope.getObject().position.y < scope.height+minY) {
+        } else if (minY != 0 && scope.getObject().position.y < scope.height + minY) {
             velocity.y = minY
             scope.getObject().position.y = scope.height + minY
 
             canJump = true
         }
-        // console.log(canJump)
 
-  
-        prevTime = time
+        scope.prevTime = time
     }
 }
