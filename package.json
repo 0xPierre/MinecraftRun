@@ -1,5 +1,5 @@
 {
-  "name": "typescript-webpack-threejs-template",
+  "name": "minecraft-run",
   "version": "1.0.0",
   "scripts": {
     "start": "webpack serve",
