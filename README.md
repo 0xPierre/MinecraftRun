@@ -1,6 +1,6 @@
-# TypeScript + Webpack + Three.js template
+# Minecraft Run
 
-A minimalistic template for Three.js projects
+Un jeu minimaliste.
 
 
 ## Installing dependencies
@@ -15,7 +15,4 @@ A minimalistic template for Three.js projects
 
     npm run build
 
-## Linting the code
-
-    npm run lint
 
