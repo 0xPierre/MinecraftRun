@@ -262,7 +262,7 @@ const updateCounter = setInterval(() => {
         const count = parseInt(counter.textContent || 0) + 1
         // @ts-ignore
         counter.textContent = count
-        if (count % 100 === 0) {
+        if (count % 50 === 0) {
             // @ts-ignore
             controls.speed += 0.5
             backgroundMusic.setPlaybackRate(backgroundMusic.playbackRate + 0.02)
@@ -394,6 +394,16 @@ if (instructions && havePointerLock) {
     }
 
     document.addEventListener('pointerlockchange', onPointerLockChange, false)
+    document.addEventListener('keyup', (event: KeyboardEvent) => {
+        if (event.code === 'Space') {
+            if (isOver) {
+                document.location.replace('/')
+            } else {
+                playGame()
+                element.requestPointerLock()
+            }
+        }
+    }, false)
 
     instructions.addEventListener('click', (event: Event) => {
         // @ts-ignore

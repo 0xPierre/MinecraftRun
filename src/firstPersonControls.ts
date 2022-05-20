@@ -56,6 +56,8 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
 
         switch (event.keyCode) {
             case 38: // up
+                if (canJump === true) velocity.y += run === false ? scope.jumpHeight : scope.jumpHeight + 50
+                canJump = false
             case 90: // z
                 moveForward = true
                 break
@@ -78,10 +80,6 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
             case 32: // space
                 if (canJump === true) velocity.y += run === false ? scope.jumpHeight : scope.jumpHeight + 50
                 canJump = false
-                break
-
-            case 16: // shift
-                run = true
                 break
 
         }
@@ -111,10 +109,6 @@ export default function (camera: THREE.Camera, MouseMoveSensitivity = 0.002, xSp
             case 39: // right
             case 68: // d
                 moveRight = false
-                break
-
-            case 16: // shift
-                run = false
                 break
 
         }
