@@ -5,8 +5,4 @@ Made using :
 - Typescript
 - ThreeJs
 
-![image](https://github.com/0xPierre/Projet-NSI-2022-2/assets/64857347/1b87131b-8a87-40c2-b385-db9181e32d42)
-
-
-
-
+![image](https://github.com/0xPierre/MinecraftRun/assets/64857347/2c338d42-7b30-4007-9b95-20a2ac6dbab5)
