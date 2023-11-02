@@ -1,6 +1,9 @@
 # Minecraft Run
 Minecraft Run is a minimalist minecraft like Temple Run made for a final project of highschool in a few days.
 You can try it here [https://minecraftrun.netlify.app/](https://minecraftrun.netlify.app/) <br />
+
+To start playing click on the screen, then you can move using the arrow keys, and jump with space. Enjoy !
+
 Made using :
 - Typescript
 - ThreeJs
